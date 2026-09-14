@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>CHAPA — Diseño de reseña, listo para prensa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Bebas+Neue&family=Manrope:wght@400;500;600;700&family=Nunito:wght@600;700;800&family=Oswald:wght@500;600;700&family=Outfit:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/studio.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="app">
+    <aside class="rail">
+      <div class="mark">
+        <h1>CHAPA</h1>
+        <span>NFC</span>
+      </div>
+      <p class="lede">Diseño NFC listo para prensa. Reseña, carta o redes: sube logo, fija milímetros, exporta.</p>
+
+      <section class="block" aria-labelledby="marca-h">
+        <h2 id="marca-h">Marca</h2>
+        <div class="drop" id="drop-marca" role="button" tabindex="0" aria-label="Cargar logo del cliente">
+          <img id="logo-thumb" alt="Vista previa del logo" src="assets/demo-logo.png">
+          <p>Suelta el logo aquí<br><small>PNG, JPG, SVG o WEBP</small></p>
+          <input id="logo-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+        </div>
+        <label class="field">Nombre del local (opcional)
+          <input id="copy-name" type="text" placeholder="Ej. El Origen" autocomplete="off">
+        </label>
+        <p class="hint">Si lo dejas vacío, solo se ve el logo. Si lo escribes, aparece debajo, centrado, en todas las composiciones.</p>
+        <div class="swatches" id="swatches" aria-label="Tintas extraídas"></div>
+        <p class="hint" id="auto-fondo-hint">El banner se elige según si el logo es claro u oscuro.</p>
+        <div class="toggle" role="group" aria-label="Fondo de la pieza">
+          <button type="button" data-fondo="claro" aria-pressed="true">Fondo claro</button>
+          <button type="button" data-fondo="oscuro" aria-pressed="false">Fondo oscuro</button>
+        </div>
+        <div class="layouts variants" role="group" aria-label="Variantes de color">
+          <button type="button" data-variant="dom" aria-pressed="true">A Dominante</button>
+          <button type="button" data-variant="acc" aria-pressed="false">B Acento</button>
+          <button type="button" data-variant="inv" aria-pressed="false">C Invertido</button>
+        </div>
+      </section>
+
+      <section class="block" aria-labelledby="medidas-h">
+        <h2 id="medidas-h">Medidas (cm)</h2>
+        <div class="toggle unit-toggle" role="group" aria-label="Unidad de medida">
+          <button type="button" data-unit="cm" aria-pressed="true">Centímetros</button>
+          <button type="button" data-unit="mm" aria-pressed="false">Milímetros</button>
+        </div>
+        <div class="row">
+          <label class="field">Ancho
+            <input id="mm-w" type="number" min="2" max="40" step="0.01" value="5.41">
+          </label>
+          <label class="field">Alto
+            <input id="mm-h" type="number" min="2" max="40" step="0.01" value="8.51">
+          </label>
+        </div>
+        <div class="chips">
+          <button type="button" class="chip" data-preset="tarjeta" aria-pressed="true">Tarjeta 5.41×8.51</button>
+          <button type="button" class="chip" data-preset="mesa" aria-pressed="false">Mesa 10×14</button>
+          <button type="button" class="chip" data-preset="plaza" aria-pressed="false">Plaza 9×9</button>
+          <button type="button" class="chip" data-preset="display" aria-pressed="false">Display 12×18</button>
+          <button type="button" class="chip" id="preset-custom" data-preset="custom" aria-pressed="false">Personalizado</button>
+        </div>
+        <p class="ratio" id="ratio-readout">Proporción 5.41 × 8.51 cm</p>
+        <label class="field">Sangrado PDF
+          <div class="bleed chips">
+            <button type="button" class="chip" data-bleed="0" aria-pressed="true">0 cm</button>
+            <button type="button" class="chip" data-bleed="2" aria-pressed="false">0.2 cm</button>
+            <button type="button" class="chip" data-bleed="3" aria-pressed="false">0.3 cm</button>
+          </div>
+        </label>
+      </section>
+
+      <section class="block" aria-labelledby="uso-h">
+        <h2 id="uso-h">Uso de la pieza</h2>
+        <div class="layouts usos" role="group" aria-label="Tipo de diseño">
+          <button type="button" data-uso="google" aria-pressed="true">Reseña</button>
+          <button type="button" data-uso="carta" aria-pressed="false">Carta</button>
+          <button type="button" data-uso="redes" aria-pressed="false">Redes</button>
+          <button type="button" data-uso="whatsapp" aria-pressed="false">WhatsApp</button>
+        </div>
+        <p class="hint" id="uso-hint">Pega el enlace de reseña de Google. El QR se genera al instante.</p>
+        <div class="redes-sub" id="redes-sub" hidden>
+          <p class="field">Elige la red</p>
+          <div class="layouts usos red-pick" role="group" aria-label="Red social">
+            <button type="button" data-red="instagram" aria-pressed="true">
+              <svg class="red-ico" viewBox="0 0 48 48" aria-hidden="true">
+                <defs>
+                  <linearGradient id="ig-g-pick" x1="8" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#f58529"/><stop offset=".45" stop-color="#dd2a7b"/><stop offset="1" stop-color="#515bd4"/>
+                  </linearGradient>
+                </defs>
+                <rect x="6" y="6" width="36" height="36" rx="10" fill="url(#ig-g-pick)"/>
+                <rect x="15" y="15" width="18" height="18" rx="6" fill="none" stroke="#fff" stroke-width="2.6"/>
+                <circle cx="24" cy="24" r="5" fill="none" stroke="#fff" stroke-width="2.6"/>
+                <circle cx="32.5" cy="15.5" r="1.8" fill="#fff"/>
+              </svg>
+              Instagram
+            </button>
+            <button type="button" data-red="facebook" aria-pressed="false">
+              <svg class="red-ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="6" y="6" width="36" height="36" rx="10" fill="#1877F2"/>
+                <path fill="#fff" d="M27.2 38V26.7h3.8l.6-4.4h-4.4v-2.8c0-1.3.4-2.1 2.2-2.1H32V13.3c-.4 0-1.9-.2-3.6-.2-3.6 0-6 2.2-6 6.1v3.1h-4v4.4h4V38h4.8z"/>
+              </svg>
+              Facebook
+            </button>
+            <button type="button" data-red="whatsapp" aria-pressed="false">
+              <svg class="red-ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="6" y="6" width="36" height="36" rx="10" fill="#25D366"/>
+                <path fill="#fff" d="M24.1 14.2c-5.4 0-9.8 4.4-9.8 9.8 0 1.7.5 3.3 1.3 4.7l-1.4 5.2 5.3-1.4c1.3.7 2.9 1.1 4.6 1.1 5.4 0 9.8-4.4 9.8-9.8s-4.4-9.6-9.8-9.6zm5.7 13.8c-.2.7-1.4 1.3-1.9 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-3.8-4.9-4-.2-.2-1.3-1.7-1.3-3.3s.8-2.3 1.1-2.6c.2-.3.5-.4.8-.4h.6c.2 0 .4 0 .6.5.2.6.8 2 .8 2.1.1.2.1.3 0 .5-.1.2-.2.3-.3.5l-.5.6c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l.9-1.2c.2-.2.4-.2.7-.1.3.1 1.8.8 2.1 1 .3.1.5.2.6.4.1.3 0 1.1-.2 1.8z"/>
+              </svg>
+              WhatsApp
+            </button>
+            <button type="button" data-red="web" aria-pressed="false">
+              <svg class="red-ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="6" y="6" width="36" height="36" rx="10" fill="#0f766e"/>
+                <circle cx="24" cy="24" r="10" fill="none" stroke="#fff" stroke-width="2.4"/>
+                <path d="M14 24h20M24 14c2.8 2.6 4.4 6 4.4 10S26.8 31.4 24 34c-2.8-2.6-4.4-6-4.4-10S21.2 16.6 24 14z" fill="none" stroke="#fff" stroke-width="2.2"/>
+              </svg>
+              Página web
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" aria-labelledby="copy-h">
+        <h2 id="copy-h">Copy de la pieza</h2>
+        <label class="field">Texto superior
+          <input id="copy-top" type="text" value="Reseña en Google">
+        </label>
+        <label class="field">Título
+          <input id="copy-title" type="text" value="Califícanos en Google">
+        </label>
+        <label class="field">Subtítulo
+          <input id="copy-sub" type="text" value="Acerca el teléfono y deja tu reseña">
+        </label>
+        <label class="field">URL / QR
+          <input id="copy-url" type="text" placeholder="https://g.page/r/…/review" autocomplete="off" spellcheck="false">
+        </label>
+        <p class="hint" id="url-hint">Pega el enlace. El QR clásico se genera al instante y debe abrirse al escanearlo.</p>
+        <label class="field">Texto NFC
+          <input id="copy-nfc" type="text" value="Toca para dejar tu experiencia">
+        </label>
+      </section>
+
+      <section class="block" aria-labelledby="comp-h">
+        <h2 id="comp-h">Composición</h2>
+        <p class="hint">Farol, Placa y Ficha se editan por separado: logo, iconos, QR y letra de una no cambian las otras.</p>
+        <div class="layouts">
+          <button type="button" data-layout="farol" aria-pressed="true">Farol</button>
+          <button type="button" data-layout="placa" aria-pressed="false">Placa</button>
+          <button type="button" data-layout="ficha" aria-pressed="false">Ficha</button>
+        </div>
+      </section>
+
+      <section class="block" aria-labelledby="tipo-h">
+        <h2 id="tipo-h">Tipografía</h2>
+        <p class="field">Tipo de letra</p>
+        <div class="layouts font-pick" role="group" aria-label="Familia tipográfica">
+          <button type="button" data-font="outfit" aria-pressed="true" style="font-family:Outfit,sans-serif">Outfit</button>
+          <button type="button" data-font="syne" aria-pressed="false" style="font-family:Syne,sans-serif">Syne</button>
+          <button type="button" data-font="manrope" aria-pressed="false" style="font-family:Manrope,sans-serif">Manrope</button>
+          <button type="button" data-font="bebas" aria-pressed="false" style="font-family:'Bebas Neue',sans-serif">Bebas</button>
+          <button type="button" data-font="oswald" aria-pressed="false" style="font-family:Oswald,sans-serif">Oswald</button>
+          <button type="button" data-font="nunito" aria-pressed="false" style="font-family:Nunito,sans-serif">Nunito</button>
+          <button type="button" data-font="playfair" aria-pressed="false" style="font-family:'Playfair Display',serif">Playfair</button>
+          <button type="button" data-font="archivo" aria-pressed="false" style="font-family:Archivo,sans-serif">Archivo</button>
+        </div>
+        <label class="field">
+          <span id="type-title-lab">Tamaño del título (Reseña · Farol)</span>
+          <div class="type-row">
+            <input id="type-title" type="range" min="50" max="130" step="1" value="70">
+            <span id="type-title-val">70%</span>
+          </div>
+        </label>
+        <label class="field">
+          <span id="type-body-lab">Tamaño del texto (Reseña · Farol)</span>
+          <div class="type-row">
+            <input id="type-body" type="range" min="50" max="130" step="1" value="82">
+            <span id="type-body-val">82%</span>
+          </div>
+        </label>
+        <p class="hint">Baja el título si se sale, sobre todo en Redes, Ficha o tarjetas chicas. El PDF exporta el tamaño que ves.</p>
+        <label class="field">
+          <span id="qr-scale-lab">Tamaño del QR (Reseña · Farol)</span>
+          <div class="type-row">
+            <input id="qr-scale" type="range" min="50" max="180" step="5" value="100">
+            <span id="qr-scale-val">100%</span>
+          </div>
+        </label>
+        <p class="hint">Súbelo si el QR se ve chico al escanear. Bájalo si tapa el texto de la tarjeta.</p>
+        <label class="field">
+          <span id="logo-scale-lab">Logo del negocio (Reseña · Farol)</span>
+          <div class="type-row">
+            <input id="logo-scale" type="range" min="50" max="160" step="5" value="100">
+            <span id="logo-scale-val">100%</span>
+          </div>
+        </label>
+        <label class="field">
+          <span id="lockup-scale-lab">Icono de Google (Farol)</span>
+          <div class="type-row">
+            <input id="lockup-scale" type="range" min="50" max="160" step="5" value="100">
+            <span id="lockup-scale-val">100%</span>
+          </div>
+        </label>
+        <p class="hint">Cada uso y cada composición (Farol, Placa, Ficha) guarda sus propios tamaños. Cambia de composición y vuelve: lo que ajustaste se mantiene.</p>
+        <label class="field">
+          <span id="nfc-scale-lab">Icono NFC (ondas) (Reseña · Farol)</span>
+          <div class="type-row">
+            <input id="nfc-scale" type="range" min="50" max="220" step="5" value="100">
+            <span id="nfc-scale-val">100%</span>
+          </div>
+        </label>
+        <div id="stars-scale-wrap">
+          <label class="field">
+            <span id="stars-scale-lab">Estrellas de reseña (Reseña · Farol)</span>
+            <div class="type-row">
+              <input id="stars-scale" type="range" min="50" max="180" step="5" value="100">
+              <span id="stars-scale-val">100%</span>
+            </div>
+          </label>
+        </div>
+        <div id="ornament-scale-wrap" hidden>
+          <label class="field">
+            <span id="ornament-scale-lab">Adorno (línea y rombo)</span>
+            <div class="type-row">
+              <input id="ornament-scale" type="range" min="50" max="180" step="5" value="100">
+              <span id="ornament-scale-val">100%</span>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <section class="block" style="border-bottom:0">
+        <h2>Exportar</h2>
+        <div class="export-row">
+          <button type="button" class="btn-press" id="btn-pdf">Exportar PDF de impresión</button>
+          <button type="button" class="btn-ghost" id="btn-png">Descargar PNG 300 dpi</button>
+        </div>
+        <p class="hint" id="export-size">El PDF sale a 5.41 × 8.51 cm. El PNG es la misma pieza a 300 dpi, lista para imprenta.</p>
+      </section>
+    </aside>
+
+    <main class="table">
+      <div class="table-head">
+        <span>Mesa de luz · registro</span>
+        <span>Taller Humo · demo hasta cargar marca</span>
+      </div>
+      <div class="light-well" id="light-well">
+        <span class="reg tl"></span>
+        <span class="reg tr"></span>
+        <span class="reg bl"></span>
+        <span class="reg br"></span>
+        <div class="rulers">
+          <div class="ruler-x" id="ruler-x"></div>
+          <div class="ruler-y" id="ruler-y"></div>
+        </div>
+        <div class="stage" id="stage">
+          <article id="press-sheet" aria-label="Pieza de prensa"></article>
+        </div>
+      </div>
+      <div class="table-foot">
+        <span id="press-status">Tamaño de prensa: 5.41 × 8.51 cm · paleta detectada: 5 tintas · QR en espera</span>
+      </div>
+    </main>
+  </div>
+  <div id="export-host"></div>
+
+  <script src="assets/qrcode.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
