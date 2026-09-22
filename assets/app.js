@@ -113,6 +113,7 @@
     fondoManual: false,
     demo: true,
     logoSrc: "assets/demo-logo.png",
+    mostrarLogo: true,
     logoShape: "logo-sq",
     logoClaro: false,
     logoLum: 0.35,
@@ -563,6 +564,10 @@
     });
   }
 
+  function mismoColor(a, b) {
+    return String(a || "").toLowerCase() === String(b || "").toLowerCase();
+  }
+
   function paintSwatches(container, colors, locked, title, onPick) {
     if (!container) return;
     container.innerHTML = "";
@@ -572,10 +577,21 @@
       b.type = "button";
       b.title = title + " " + c;
       b.style.background = c;
-      b.setAttribute("aria-pressed", String(locked === c));
+      b.setAttribute("aria-pressed", String(mismoColor(locked, c)));
       b.addEventListener("click", () => onPick(c));
       container.appendChild(b);
     });
+  }
+
+  function syncColorPicker(id, locked, fallback, colors) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    const rgb = hexToRgb(locked || fallback || "#000000");
+    const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    if (input.value.toLowerCase() !== hex) input.value = hex;
+    const custom = !!locked && !colors.some((c) => mismoColor(c, hex));
+    const lab = input.closest("label");
+    if (lab) lab.classList.toggle("is-custom", custom);
   }
 
   function renderSwatches(p) {
@@ -592,6 +608,13 @@
       applyPaletteCss();
       renderCard();
     });
+    let banner = bannerAuto(state.palette);
+    if (state.variant === "acc") banner = state.palette.accent;
+    if (state.variant === "inv") banner = state.palette.ink;
+    const invertido = state.variant === "inv" || state.fondoOscuro;
+    const paperShown = invertido ? p.ink : p.paper;
+    syncColorPicker("color-top", state.tintaLock, banner, colors);
+    syncColorPicker("color-body", state.cuerpoLock, paperShown, colors);
   }
 
   function pickLayoutAuto() {
@@ -1040,7 +1063,10 @@
     const name = el.name ? el.name.value.trim() : "";
     const p = state.palette;
     const nameHtml = name ? `<div class="biz-name">${escapeHtml(name)}</div>` : "";
-    const logo = `<div class="brand-lockup"><div class="logo-slot ${state.logoShape}"><img alt="Logo del cliente" src="${state.logoSrc}"></div>${nameHtml}</div>`;
+    const logoImg = state.mostrarLogo
+      ? `<div class="logo-slot ${state.logoShape}"><img alt="Logo del cliente" src="${state.logoSrc}"></div>`
+      : "";
+    const logo = (logoImg || nameHtml) ? `<div class="brand-lockup">${logoImg}${nameHtml}</div>` : "";
     const demo = state.demo ? `<div class="demo-mark">DEMO</div>` : "";
     const lockup = purposeLockup();
     const starsHtml = purposeStars();
@@ -1060,6 +1086,7 @@
     if (esPiezaTarjeta()) el.sheet.classList.add("is-card");
     if (esPlaza()) el.sheet.classList.add("is-square");
     if (name) el.sheet.classList.add("has-name");
+    if (!state.mostrarLogo) el.sheet.classList.add("no-logo");
 
     if (state.layout === "farol") {
       html = `${demo}
@@ -1290,6 +1317,7 @@
       };
     }
     state.demo = false;
+    state.mostrarLogo = true;
     state.logoSrc = fitted.src;
     state.logoShape = formaLogo(fitted.w, fitted.h);
     state.tintaLock = null;
@@ -1306,6 +1334,8 @@
     }
     syncVariantButtons();
     el.thumb.src = fitted.src;
+    const verLogo = document.getElementById("logo-ver");
+    if (verLogo) verLogo.checked = true;
     const head = document.querySelector(".table-head span:last-child");
     if (head) {
       const nom = el.name && el.name.value.trim();
@@ -1898,6 +1928,32 @@
       exportPng().catch(() => alert("No se pudo exportar el PNG."));
     });
     document.getElementById("btn-lote-armar").addEventListener("click", armarListaLote);
+    const colorTop = document.getElementById("color-top");
+    const colorBody = document.getElementById("color-body");
+    if (colorTop) {
+      colorTop.addEventListener("input", () => {
+        state.tintaLock = colorTop.value;
+        state.variant = "dom";
+        syncVariantButtons();
+        applyPaletteCss();
+        renderCard();
+      });
+    }
+    if (colorBody) {
+      colorBody.addEventListener("input", () => {
+        state.cuerpoLock = colorBody.value;
+        applyPaletteCss();
+        renderCard();
+      });
+    }
+    const verLogo = document.getElementById("logo-ver");
+    if (verLogo) {
+      state.mostrarLogo = verLogo.checked;
+      verLogo.addEventListener("change", () => {
+        state.mostrarLogo = verLogo.checked;
+        renderCard();
+      });
+    }
     const verSerial = document.getElementById("lote-serial-ver");
     if (verSerial) {
       state.mostrarSerial = verSerial.checked;

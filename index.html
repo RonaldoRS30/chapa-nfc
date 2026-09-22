@@ -26,14 +26,30 @@
           <p>Suelta el logo aquí<br><small>PNG, JPG, SVG o WEBP</small></p>
           <input id="logo-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
         </div>
+        <label class="lote-check">
+          <input id="logo-ver" type="checkbox" checked>
+          <span>Mostrar el logo en la tarjeta</span>
+        </label>
+        <p class="hint">Los colores se toman del archivo aunque el logo no se muestre.</p>
         <label class="field">Nombre del local (opcional)
           <input id="copy-name" type="text" placeholder="Ej. El Origen" autocomplete="off">
         </label>
         <p class="hint">Si lo dejas vacío, solo se ve el logo. Si lo escribes, aparece debajo, centrado, en todas las composiciones.</p>
         <p class="hint swatch-lab">Parte superior</p>
-        <div class="swatches" id="swatches" aria-label="Color de la parte superior"></div>
+        <div class="swatch-row">
+          <div class="swatches" id="swatches" aria-label="Colores del logo para la parte superior"></div>
+          <label class="swatch-pick" title="Cualquier color para la parte superior">
+            <input id="color-top" type="color" value="#5c3317" aria-label="Elegir cualquier color para la parte superior">
+          </label>
+        </div>
         <p class="hint swatch-lab">Parte inferior</p>
-        <div class="swatches" id="swatches-body" aria-label="Color de la parte inferior"></div>
+        <div class="swatch-row">
+          <div class="swatches" id="swatches-body" aria-label="Colores del logo para la parte inferior"></div>
+          <label class="swatch-pick" title="Cualquier color para la parte inferior">
+            <input id="color-body" type="color" value="#f3e6d4" aria-label="Elegir cualquier color para la parte inferior">
+          </label>
+        </div>
+        <p class="hint">Los cuadros salen de tu logo. El anillo abre cualquier otro color, arriba o abajo.</p>
         <p class="hint" id="auto-fondo-hint">Elige una tinta para cada zona. Si no tocas la inferior, se asigna sola.</p>
         <div class="toggle" role="group" aria-label="Fondo de la pieza">
           <button type="button" data-fondo="claro" aria-pressed="true">Fondo claro</button>
