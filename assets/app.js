@@ -132,6 +132,7 @@
     typeBodyByKey: {},
     palette: { ...DEMO },
     tintaLock: null,
+    cuerpoLock: null,
     qrDataUrl: "",
     url: "",
   };
@@ -141,6 +142,7 @@
     file: document.getElementById("logo-file"),
     thumb: document.getElementById("logo-thumb"),
     swatches: document.getElementById("swatches"),
+    swatchesBody: document.getElementById("swatches-body"),
     w: document.getElementById("mm-w"),
     h: document.getElementById("mm-h"),
     ratio: document.getElementById("ratio-readout"),
@@ -383,8 +385,8 @@
     const hint = document.getElementById("auto-fondo-hint");
     if (hint) {
       hint.textContent = state.logoClaro
-        ? "Logo claro: banner oscuro automático."
-        : "Logo oscuro: banner más claro para que se lea.";
+        ? "Logo claro: la parte superior queda oscura. La inferior se elige abajo."
+        : "Logo oscuro: la parte superior queda clara. La inferior se elige abajo.";
     }
   }
 
@@ -538,6 +540,7 @@
     if (state.variant === "acc") banner = state.palette.accent;
     if (state.variant === "inv") banner = state.palette.ink;
     if (state.tintaLock) banner = state.tintaLock;
+    const body = state.cuerpoLock || p.paper;
     const sheet = el.sheet;
     sheet.style.setProperty("--c-dom", banner);
     sheet.style.setProperty("--c-acc", p.accent);
@@ -545,6 +548,8 @@
     sheet.style.setProperty("--c-ink", p.ink);
     sheet.style.setProperty("--c-paper", p.paper);
     sheet.style.setProperty("--c-on-dom", readableOn(banner));
+    sheet.style.setProperty("--c-body", body);
+    sheet.style.setProperty("--c-on-body", readableOn(body));
     renderSwatches({
       dominant: state.palette.dominant,
       support: state.palette.support,
@@ -554,24 +559,34 @@
     });
   }
 
-  function renderSwatches(p) {
-    const colors = [p.dominant, p.support, p.accent, p.ink, p.paper];
-    el.swatches.innerHTML = "";
+  function paintSwatches(container, colors, locked, title, onPick) {
+    if (!container) return;
+    container.innerHTML = "";
     colors.forEach((c) => {
       const b = document.createElement("button");
       b.className = "swatch";
       b.type = "button";
-      b.title = "Fijar tinta principal " + c;
+      b.title = title + " " + c;
       b.style.background = c;
-      b.setAttribute("aria-pressed", String(state.tintaLock === c));
-      b.addEventListener("click", () => {
-        state.tintaLock = c;
-        state.variant = "dom";
-        syncVariantButtons();
-        applyPaletteCss();
-        renderCard();
-      });
-      el.swatches.appendChild(b);
+      b.setAttribute("aria-pressed", String(locked === c));
+      b.addEventListener("click", () => onPick(c));
+      container.appendChild(b);
+    });
+  }
+
+  function renderSwatches(p) {
+    const colors = [p.dominant, p.support, p.accent, p.ink, p.paper];
+    paintSwatches(el.swatches, colors, state.tintaLock, "Color de la parte superior", (c) => {
+      state.tintaLock = c;
+      state.variant = "dom";
+      syncVariantButtons();
+      applyPaletteCss();
+      renderCard();
+    });
+    paintSwatches(el.swatchesBody, colors, state.cuerpoLock, "Color de la parte inferior", (c) => {
+      state.cuerpoLock = c;
+      applyPaletteCss();
+      renderCard();
     });
   }
 
@@ -1146,6 +1161,7 @@
     state.logoSrc = fitted.src;
     state.logoShape = formaLogo(fitted.w, fitted.h);
     state.tintaLock = null;
+    state.cuerpoLock = null;
     state.variant = "dom";
     state.fondoManual = false;
     try {

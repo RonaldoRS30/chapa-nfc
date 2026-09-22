@@ -30,8 +30,11 @@
           <input id="copy-name" type="text" placeholder="Ej. El Origen" autocomplete="off">
         </label>
         <p class="hint">Si lo dejas vacío, solo se ve el logo. Si lo escribes, aparece debajo, centrado, en todas las composiciones.</p>
-        <div class="swatches" id="swatches" aria-label="Tintas extraídas"></div>
-        <p class="hint" id="auto-fondo-hint">El banner se elige según si el logo es claro u oscuro.</p>
+        <p class="hint swatch-lab">Parte superior</p>
+        <div class="swatches" id="swatches" aria-label="Color de la parte superior"></div>
+        <p class="hint swatch-lab">Parte inferior</p>
+        <div class="swatches" id="swatches-body" aria-label="Color de la parte inferior"></div>
+        <p class="hint" id="auto-fondo-hint">Elige una tinta para cada zona. Si no tocas la inferior, se asigna sola.</p>
         <div class="toggle" role="group" aria-label="Fondo de la pieza">
           <button type="button" data-fondo="claro" aria-pressed="true">Fondo claro</button>
           <button type="button" data-fondo="oscuro" aria-pressed="false">Fondo oscuro</button>
