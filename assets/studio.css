@@ -325,6 +325,52 @@ textarea { min-height: 56px; resize: vertical; }
 }
 
 .export-row { display: flex; flex-direction: column; gap: 8px; }
+.lote-tools { margin: 10px 0; }
+.lote-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font: 600 13px/1.3 Manrope, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--bone);
+  cursor: pointer;
+}
+.lote-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--acid);
+  cursor: pointer;
+}
+#lote-urls {
+  min-height: 120px;
+  resize: vertical;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+}
+.qr-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  flex: none;
+}
+.qr-stack .qr-box,
+.layout-farol .qr-stack .qr-box,
+.is-card .qr-stack .qr-box,
+.scale-compact.layout-farol .qr-stack .qr-box {
+  max-width: none;
+}
+.lote-serial {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: calc(var(--short) * 0.032);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  color: currentColor;
+}
 .btn-press, .btn-ghost {
   font: 700 12px/1 Syne, sans-serif;
   letter-spacing: 0.14em;
@@ -572,7 +618,13 @@ textarea { min-height: 56px; resize: vertical; }
 .g-lockup .g-yellow { color: var(--g-yellow); }
 .g-lockup .g-green { color: var(--g-green); }
 
-.g-mark { width: calc(1.15em * var(--lockup-scale, 1)); height: calc(1.15em * var(--lockup-scale, 1)); flex: none; }
+.g-mark {
+  width: calc(var(--short) * 0.18 * var(--lockup-scale, 1));
+  height: calc(var(--short) * 0.18 * var(--lockup-scale, 1));
+  max-width: none;
+  flex: none;
+  display: block;
+}
 
 .stars {
   display: flex;
@@ -584,11 +636,12 @@ textarea { min-height: 56px; resize: vertical; }
 
 .nfc {
   width: calc(var(--nfc-mm, var(--mark-mm, 28mm)) * var(--nfc-scale, 1));
-  height: calc(var(--nfc-mm, var(--mark-mm, 28mm)) * var(--nfc-scale, 1));
-  max-width: 58%;
-  aspect-ratio: 1;
+  height: auto;
+  max-width: 92%;
+  aspect-ratio: 92 / 60;
   margin: 0 auto;
   flex: none;
+  display: block;
 }
 .logo-slot {
   display: flex;
@@ -627,7 +680,7 @@ textarea { min-height: 56px; resize: vertical; }
   flex-shrink: 0;
   width: var(--qr-mm, var(--mark-mm, 28mm));
   height: var(--qr-mm, var(--mark-mm, 28mm));
-  max-width: 52%;
+  max-width: 68%;
 }
 .qr-box img {
   display: block;
@@ -711,7 +764,7 @@ textarea { min-height: 56px; resize: vertical; }
 .layout-farol .banner .g-lockup,
 .layout-farol .banner .use-lockup {
   flex: none;
-  max-width: 42%;
+  max-width: 58%;
   font-size: calc(var(--short) * 0.055 * var(--type-body) * var(--lockup-scale, 1));
 }
 .layout-farol .sheet-inner.compact .logo-slot {
@@ -798,7 +851,7 @@ textarea { min-height: 56px; resize: vertical; }
 }
 .layout-placa .placa-foot .nfc {
   width: calc(var(--nfc-mm, var(--mark-mm, 24mm)) * var(--nfc-scale, 1));
-  height: calc(var(--nfc-mm, var(--mark-mm, 24mm)) * var(--nfc-scale, 1));
+  height: auto;
   max-width: 48%;
   margin: 0;
 }
@@ -815,12 +868,12 @@ textarea { min-height: 56px; resize: vertical; }
   max-width: 78%;
 }
 .layout-farol .qr-box {
-  max-width: 52%;
+  max-width: 68%;
 }
 .layout-farol .nfc {
   width: calc(var(--nfc-mm, var(--mark-mm, 28mm)) * var(--nfc-scale, 1));
-  height: calc(var(--nfc-mm, var(--mark-mm, 28mm)) * var(--nfc-scale, 1));
-  max-width: 58%;
+  height: auto;
+  max-width: 92%;
 }
 
 /* Ficha */
@@ -881,7 +934,7 @@ textarea { min-height: 56px; resize: vertical; }
   width: calc(48% * var(--nfc-scale, 1));
   height: auto;
   max-width: 96%;
-  aspect-ratio: 1;
+  aspect-ratio: 92 / 60;
   margin: 0 auto;
 }
 
@@ -1021,7 +1074,8 @@ textarea { min-height: 56px; resize: vertical; }
 }
 
 #press-sheet h3 {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
   text-wrap: balance;
   max-width: 96%;
 }
@@ -1040,39 +1094,42 @@ textarea { min-height: 56px; resize: vertical; }
   height: calc(var(--short) * 0.28 * var(--logo-scale, 1));
 }
 .scale-compact.layout-farol .body {
-  padding: 4% 7% 5%;
-  gap: 2%;
+  padding: 3% 6% 4%;
+  gap: 1.4%;
 }
 .scale-compact.layout-farol h3 {
-  font-size: calc(var(--short) * 0.064 * var(--type-title));
-  line-height: 1.08;
+  font-size: calc(var(--short) * 0.074 * var(--type-title));
+  line-height: 1.05;
 }
 .scale-compact.layout-farol .sub {
-  font-size: calc(var(--short) * 0.033 * var(--type-body));
-  line-height: 1.2;
-  max-width: 94%;
+  font-size: calc(var(--short) * 0.04 * var(--type-body));
+  line-height: 1.15;
+  max-width: 96%;
 }
 .scale-compact.layout-farol .nfc-hint {
-  font-size: calc(var(--short) * 0.028 * var(--type-body));
-  line-height: 1.2;
+  font-size: calc(var(--short) * 0.034 * var(--type-body));
+  line-height: 1.15;
   max-width: 54%;
 }
 .scale-compact.layout-farol .banner .g-lockup,
 .scale-compact.layout-farol .banner .use-lockup {
-  font-size: calc(var(--short) * 0.046 * var(--type-body) * var(--lockup-scale, 1));
-  max-width: 48%;
+  font-size: calc(var(--short) * 0.05 * var(--type-body));
+  max-width: 58%;
 }
 .scale-compact .eyebrow {
-  font-size: calc(var(--short) * 0.026 * var(--type-body));
+  font-size: calc(var(--short) * 0.034 * var(--type-body));
 }
-.scale-compact .stars svg { width: 1em; }
-.scale-compact .nfc { max-width: 52%; }
+.scale-compact .stars {
+  font-size: calc(var(--short) * 0.052 * var(--stars-scale, 1));
+}
+.scale-compact .stars svg { width: 1em; height: 1em; }
+.scale-compact .nfc { max-width: 92%; }
 .scale-compact.layout-ficha .nfc {
   width: calc(48% * var(--nfc-scale, 1));
   height: auto;
   max-width: 96%;
 }
-.scale-compact.layout-farol .qr-box { max-width: 52%; }
+.scale-compact.layout-farol .qr-box { max-width: 68%; }
 .scale-compact.uso-redes .logo-slot {
   outline-width: 1.5px;
   outline-offset: 1.5px;
@@ -1140,16 +1197,16 @@ textarea { min-height: 56px; resize: vertical; }
   height: calc(var(--short) * 0.286 * var(--logo-scale, 1));
 }
 .is-card .nfc {
-  max-width: 52%;
+  max-width: 92%;
 }
 .is-card.layout-ficha .nfc {
   width: calc(48% * var(--nfc-scale, 1));
   height: auto;
   max-width: 96%;
-  aspect-ratio: 1;
+  aspect-ratio: 92 / 60;
 }
 .is-card .qr-box {
-  max-width: 52%;
+  max-width: 68%;
 }
 
 /* Plaza 9×9 cm: composición centrada, QR visible, sin recortes */
@@ -1225,7 +1282,7 @@ textarea { min-height: 56px; resize: vertical; }
 }
 .is-square.layout-farol .body { padding: 4% 7% 5%; gap: 2.2%; }
 .is-square.layout-farol .nfc { max-width: 28%; }
-.is-square.layout-farol .qr-box { max-width: 30%; }
+.is-square.layout-farol .qr-box { max-width: 42%; }
 
 #export-host {
   position: absolute;

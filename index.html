@@ -175,22 +175,22 @@
         <label class="field">
           <span id="type-title-lab">Tamaño del título (Reseña · Farol)</span>
           <div class="type-row">
-            <input id="type-title" type="range" min="50" max="130" step="1" value="70">
+            <input id="type-title" type="range" min="50" max="240" step="1" value="70">
             <span id="type-title-val">70%</span>
           </div>
         </label>
         <label class="field">
           <span id="type-body-lab">Tamaño del texto (Reseña · Farol)</span>
           <div class="type-row">
-            <input id="type-body" type="range" min="50" max="130" step="1" value="82">
+            <input id="type-body" type="range" min="50" max="220" step="1" value="82">
             <span id="type-body-val">82%</span>
           </div>
         </label>
-        <p class="hint">Baja el título si se sale, sobre todo en Redes, Ficha o tarjetas chicas. El PDF exporta el tamaño que ves.</p>
+        <p class="hint">Sube título, texto, logo de Google, ondas y estrellas hasta llenar la tarjeta. El PDF sale con ese mismo tamaño.</p>
         <label class="field">
           <span id="qr-scale-lab">Tamaño del QR (Reseña · Farol)</span>
           <div class="type-row">
-            <input id="qr-scale" type="range" min="50" max="180" step="5" value="100">
+            <input id="qr-scale" type="range" min="50" max="200" step="5" value="100">
             <span id="qr-scale-val">100%</span>
           </div>
         </label>
@@ -198,14 +198,14 @@
         <label class="field">
           <span id="logo-scale-lab">Logo del negocio (Reseña · Farol)</span>
           <div class="type-row">
-            <input id="logo-scale" type="range" min="50" max="160" step="5" value="100">
+            <input id="logo-scale" type="range" min="50" max="200" step="5" value="100">
             <span id="logo-scale-val">100%</span>
           </div>
         </label>
         <label class="field">
           <span id="lockup-scale-lab">Icono de Google (Farol)</span>
           <div class="type-row">
-            <input id="lockup-scale" type="range" min="50" max="160" step="5" value="100">
+            <input id="lockup-scale" type="range" min="40" max="280" step="5" value="100">
             <span id="lockup-scale-val">100%</span>
           </div>
         </label>
@@ -213,7 +213,7 @@
         <label class="field">
           <span id="nfc-scale-lab">Icono NFC (ondas) (Reseña · Farol)</span>
           <div class="type-row">
-            <input id="nfc-scale" type="range" min="50" max="220" step="5" value="100">
+            <input id="nfc-scale" type="range" min="50" max="320" step="5" value="100">
             <span id="nfc-scale-val">100%</span>
           </div>
         </label>
@@ -221,7 +221,7 @@
           <label class="field">
             <span id="stars-scale-lab">Estrellas de reseña (Reseña · Farol)</span>
             <div class="type-row">
-              <input id="stars-scale" type="range" min="50" max="180" step="5" value="100">
+              <input id="stars-scale" type="range" min="50" max="280" step="5" value="100">
               <span id="stars-scale-val">100%</span>
             </div>
           </label>
@@ -237,13 +237,49 @@
         </div>
       </section>
 
-      <section class="block" style="border-bottom:0">
+      <section class="block">
         <h2>Exportar</h2>
         <div class="export-row">
           <button type="button" class="btn-press" id="btn-pdf">Exportar PDF de impresión</button>
           <button type="button" class="btn-ghost" id="btn-png">Descargar PNG 300 dpi</button>
         </div>
         <p class="hint" id="export-size">El PDF sale a 5.41 × 8.51 cm. El PNG es la misma pieza a 300 dpi, lista para imprenta.</p>
+      </section>
+
+      <section class="block" style="border-bottom:0" aria-labelledby="lote-h">
+        <h2 id="lote-h">Lote para imprenta</h2>
+        <p class="hint">Mismo diseño en todas. Cada página lleva un QR distinto. El número bajo el QR se puede ocultar; el enlace de cada tarjeta no cambia.</p>
+        <label class="field">Inicio del enlace
+          <input id="lote-prefix" type="text" value="https://link.nexussystemserp.com/" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Destino provisional
+          <input id="lote-destino" type="text" value="https://nexussystemserp.com/" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="row">
+          <label class="field">Desde el n.º
+            <input id="lote-start" type="number" min="1" step="1" value="1">
+          </label>
+          <label class="field">Cantidad
+            <input id="lote-count" type="number" min="1" max="200" step="1" value="200">
+          </label>
+        </div>
+        <div class="lote-tools">
+          <button type="button" class="btn-ghost" id="btn-lote-armar">Generar lista de enlaces</button>
+        </div>
+        <label class="field">Enlaces del lote, uno por tarjeta
+          <textarea id="lote-urls" rows="6" spellcheck="false" placeholder="https://link.nexussystemserp.com/0001"></textarea>
+        </label>
+        <p class="hint" id="lote-count-hint">Todavía no hay enlaces.</p>
+        <label class="lote-check">
+          <input id="lote-serial-ver" type="checkbox" checked>
+          <span>Mostrar el número bajo el QR</span>
+        </label>
+        <div class="export-row">
+          <button type="button" class="btn-ghost" id="btn-lote-short">Descargar CSV para Short.io</button>
+          <button type="button" class="btn-press" id="btn-lote-pdf">Exportar PDF del lote</button>
+          <button type="button" class="btn-ghost" id="btn-lote-csv">Descargar registro CSV</button>
+        </div>
+        <p class="hint">Exportar PDF del lote arma una página por enlace, con su QR. Si la casilla está activa, también imprime el número. Con 200 tarjetas tarda varios minutos: deja esta pestaña abierta hasta que baje el archivo.</p>
       </section>
     </aside>
 

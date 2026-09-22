@@ -135,6 +135,8 @@
     cuerpoLock: null,
     qrDataUrl: "",
     url: "",
+    loteSerial: "",
+    mostrarSerial: true,
   };
 
   const el = {
@@ -405,8 +407,8 @@
     const f = FONTS[state.font] || FONTS.outfit;
     const sheet = el.sheet;
     if (!sheet) return;
-    const title = clamp(markPct(state.typeTitleByKey, defaultTitlePct()), 50, 130);
-    const body = clamp(markPct(state.typeBodyByKey, defaultBodyPct()), 50, 130);
+    const title = clamp(markPct(state.typeTitleByKey, defaultTitlePct()), 50, 240);
+    const body = clamp(markPct(state.typeBodyByKey, defaultBodyPct()), 50, 220);
     sheet.style.setProperty("--font-title", f.title);
     sheet.style.setProperty("--font-body", f.body);
     sheet.style.setProperty("--type-title", String(title / 100));
@@ -477,7 +479,9 @@
     setLab("type-body-lab", "Tamaño del texto (" + combo + ")");
     setLab("qr-scale-lab", "Tamaño del QR (" + combo + ")");
     setLab("logo-scale-lab", "Logo del negocio (" + combo + ")");
-    setLab("lockup-scale-lab", "Icono de " + (icons[usoKey()] || "uso") + " (" + layNom + ")");
+    setLab("lockup-scale-lab", usoKey() === "google"
+      ? "Logo de Google (" + layNom + ")"
+      : "Icono de " + (icons[usoKey()] || "uso") + " (" + layNom + ")");
     setLab("nfc-scale-lab", "Icono NFC (ondas) (" + combo + ")");
     setLab("stars-scale-lab", "Estrellas de reseña (" + combo + ")");
   }
@@ -485,10 +489,10 @@
   function applyMarkCss() {
     const sheet = el.sheet;
     if (!sheet) return;
-    const logo = clamp(markPct(state.logoScaleByUso, 100), 50, 160);
-    const lock = clamp(markPct(state.lockupScaleByUso, 100), 50, 160);
-    const nfc = clamp(markPct(state.nfcScaleByUso, defaultNfcPct()), 50, 220);
-    const stars = clamp(markPct(state.starsScaleByUso, 100), 50, 180);
+    const logo = clamp(markPct(state.logoScaleByUso, 100), 50, 200);
+    const lock = clamp(markPct(state.lockupScaleByUso, 100), 40, 280);
+    const nfc = clamp(markPct(state.nfcScaleByUso, defaultNfcPct()), 50, 320);
+    const stars = clamp(markPct(state.starsScaleByUso, 100), 50, 280);
     const orn = clamp(markPct(state.ornamentScaleByUso, 100), 50, 180);
     sheet.style.setProperty("--logo-scale", String(logo / 100));
     sheet.style.setProperty("--lockup-scale", String(lock / 100));
@@ -766,8 +770,131 @@
     }
   }
 
+  const nfcCache = {};
+
+  function nfcPng(color) {
+    const key = color || "#111111";
+    if (nfcCache[key]) return nfcCache[key];
+    const scale = 8;
+    const canvas = document.createElement("canvas");
+    canvas.width = 92 * scale;
+    canvas.height = 60 * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
+    ctx.translate(-14, -14);
+    ctx.strokeStyle = key;
+    ctx.fillStyle = key;
+    ctx.lineWidth = 5;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(60, 60, 10, 0, Math.PI * 2);
+    ctx.fill();
+    [18, 30, 42].forEach((r) => {
+      ctx.beginPath();
+      ctx.arc(60, 60, r, Math.PI, 0, false);
+      ctx.stroke();
+    });
+    const url = canvas.toDataURL("image/png");
+    nfcCache[key] = url;
+    return url;
+  }
+
+  function medidaPx(node, prop) {
+    const n = parseFloat(getComputedStyle(node)[prop]);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function congelarTexto(root) {
+    root.querySelectorAll("h3, .sub, .eyebrow, .nfc-hint, .biz-name, .g-lockup, .use-lockup, .stars, .lote-serial, .word, .qr-empty").forEach((node) => {
+      const cs = getComputedStyle(node);
+      if (cs.fontSize) node.style.fontSize = cs.fontSize;
+      if (cs.lineHeight && cs.lineHeight !== "normal") node.style.lineHeight = cs.lineHeight;
+      if (cs.letterSpacing && cs.letterSpacing !== "normal") node.style.letterSpacing = cs.letterSpacing;
+      if (cs.gap && cs.gap !== "normal") node.style.gap = cs.gap;
+    });
+  }
+
+  function cajaEnPx(node) {
+    const w = medidaPx(node, "width");
+    const h = medidaPx(node, "height");
+    node.style.width = w + "px";
+    node.style.height = h + "px";
+    node.style.maxWidth = "none";
+    return { w, h };
+  }
+
+  const svgPngCache = {};
+
+  function svgAPng(svg) {
+    const cs = getComputedStyle(svg);
+    const w = Math.max(2, Math.round(medidaPx(svg, "width") || svg.getBoundingClientRect().width));
+    const h = Math.max(2, Math.round(medidaPx(svg, "height") || svg.getBoundingClientRect().height));
+    const color = cs.color || "#111111";
+    const clone = svg.cloneNode(true);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("width", String(w * 4));
+    clone.setAttribute("height", String(h * 4));
+    clone.style.width = "";
+    clone.style.height = "";
+    clone.style.maxWidth = "";
+    let xml = new XMLSerializer().serializeToString(clone).replace(/currentColor/gi, color);
+    const key = w + "x" + h + "|" + xml;
+    if (svgPngCache[key]) return Promise.resolve(svgPngCache[key]);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = w * 4;
+        canvas.height = h * 4;
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        const url = canvas.toDataURL("image/png");
+        svgPngCache[key] = url;
+        resolve(url);
+      };
+      img.onerror = () => resolve("");
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+    });
+  }
+
+  async function fijarSvgParaExport(root) {
+    const svgs = [...root.querySelectorAll("svg.g-mark, svg.brand-ico, .stars svg, .use-lockup svg")];
+    await Promise.all(svgs.map(async (svg) => {
+      const box = cajaEnPx(svg);
+      const png = await svgAPng(svg);
+      if (!png) return;
+      const img = document.createElement("img");
+      img.className = svg.getAttribute("class") || "mark-export";
+      img.alt = "";
+      img.src = png;
+      img.style.width = box.w + "px";
+      img.style.height = box.h + "px";
+      img.style.display = "block";
+      img.style.flex = "none";
+      svg.replaceWith(img);
+      if (img.decode) await img.decode().catch(() => {});
+    }));
+  }
+
+  async function fijarNfcParaExport(root) {
+    const pendientes = [];
+    root.querySelectorAll("svg.nfc").forEach((svg) => {
+      const cs = getComputedStyle(svg);
+      const color = cs.color || "#111111";
+      const img = document.createElement("img");
+      img.className = "nfc";
+      img.alt = "";
+      img.src = nfcPng(color);
+      img.style.width = cs.width;
+      img.style.height = cs.height;
+      img.style.maxWidth = "none";
+      svg.replaceWith(img);
+      pendientes.push(img.decode ? img.decode().catch(() => {}) : Promise.resolve());
+    });
+    await Promise.all(pendientes);
+  }
+
   function nfcIcon(color) {
-    return `<svg class="nfc" viewBox="0 0 120 120" aria-hidden="true">
+    return `<svg class="nfc" viewBox="14 14 92 60" aria-hidden="true">
       <circle cx="60" cy="60" r="10" fill="${color}"/>
       <path d="M42 60a18 18 0 0 1 36 0" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
       <path d="M30 60a30 30 0 0 1 60 0" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
@@ -778,10 +905,14 @@
   function qrBlock() {
     const pack = state.uso === "redes" ? REDES[state.red] : USOS[state.uso];
     const empty = (pack && pack.qrEmpty) || "Pega la URL para generar el QR";
-    if (!state.qrDataUrl) {
-      return `<div class="qr-box is-empty"><span class="qr-empty">${empty}</span></div>`;
-    }
-    return `<div class="qr-box"><img id="qr-img" alt="Código QR" src="${state.qrDataUrl}"></div>`;
+    const serial = state.loteSerial && state.mostrarSerial
+      ? `<div class="lote-serial">${escapeHtml(state.loteSerial)}</div>`
+      : "";
+    const box = !state.qrDataUrl
+      ? `<div class="qr-box is-empty"><span class="qr-empty">${empty}</span></div>`
+      : `<div class="qr-box"><img id="qr-img" alt="Código QR" src="${state.qrDataUrl}"></div>`;
+    if (!serial) return box;
+    return `<div class="qr-stack">${box}${serial}</div>`;
   }
 
   function normalizarUrl(raw) {
@@ -869,10 +1000,10 @@
   function tamañoQrMm() {
     const short = Math.min(state.widthMm, state.heightMm);
     const scale = markPct(state.qrScaleByKey, 100) / 100;
-    const base = esPlaza() ? short * 0.28 : tamañoMarcaMm();
+    const base = esPlaza() ? short * 0.36 : Math.max(tamañoMarcaMm() * 1.75, short * 0.4);
     const scaled = base * scale;
-    const maxM = short * (esPlaza() ? 0.38 : 0.5);
-    return Math.round(clamp(scaled, 10, maxM) * 10) / 10;
+    const maxM = short * (esPlaza() ? 0.48 : 0.62);
+    return Math.round(clamp(scaled, 12, maxM) * 10) / 10;
   }
 
   function applyQrSize() {
@@ -1082,6 +1213,7 @@
       renderCard();
       return;
     }
+    state.loteSerial = "";
     try {
       state.qrDataUrl = pintarQrClasico(url);
     } catch (err) {
@@ -1265,6 +1397,47 @@
     }
   }
 
+  function colorSeguro(value) {
+    if (!value || value.indexOf("color(") === -1) return value;
+    const out = value.replace(/color\(\s*srgb\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)(?:\s*\/\s*([0-9.]+%?))?\s*\)/gi, (_, r, g, b, a) => {
+      const R = Math.round(Number(r) * 255);
+      const G = Math.round(Number(g) * 255);
+      const B = Math.round(Number(b) * 255);
+      if (a == null || a === "") return "rgb(" + R + ", " + G + ", " + B + ")";
+      const A = String(a).endsWith("%") ? Number(a) / 100 : Number(a);
+      return "rgba(" + R + ", " + G + ", " + B + ", " + A + ")";
+    });
+    return out.indexOf("color(") === -1 ? out : out.replace(/color\([^)]*\)/gi, "rgba(0, 0, 0, 0.2)");
+  }
+
+  function sanearColores(root) {
+    const props = ["color", "backgroundColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor", "outlineColor", "textDecorationColor"];
+    [root, ...root.querySelectorAll("*")].forEach((node) => {
+      const cs = getComputedStyle(node);
+      props.forEach((prop) => {
+        const raw = cs[prop];
+        if (!raw || raw.indexOf("color(") === -1) return;
+        node.style[prop] = colorSeguro(raw);
+      });
+      const sombra = cs.boxShadow || "";
+      const borde = cs.outlineColor || "";
+      if (sombra.indexOf("color(") !== -1 || borde.indexOf("color(") !== -1) {
+        if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
+          node.style.backgroundColor = cs.backgroundColor;
+        }
+        node.style.boxShadow = "none";
+        node.style.outline = "none";
+      }
+    });
+    root.querySelectorAll(".banner, .body, .sheet-inner, h3, .sub, .eyebrow, .nfc-hint, .use-lockup, .biz-name").forEach((node) => {
+      const cs = getComputedStyle(node);
+      if (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") {
+        node.style.backgroundColor = cs.backgroundColor;
+      }
+      if (cs.color) node.style.color = cs.color;
+    });
+  }
+
   async function rasterAt300() {
     const bleed = state.bleed;
     const cardW = state.widthMm;
@@ -1304,6 +1477,11 @@
     if (document.fonts && document.fonts.ready) {
       try { await document.fonts.ready; } catch (err) { /* sigue con fallback */ }
     }
+    void clone.offsetWidth;
+    congelarTexto(clone);
+    await fijarSvgParaExport(clone);
+    await fijarNfcParaExport(clone);
+    sanearColores(clone);
     const canvas = await html2canvas(wrap, {
       scale: 1,
       width: pxW,
@@ -1326,14 +1504,181 @@
     return { canvas: out, wMm, hMm };
   }
 
+  function leerUrlsLote() {
+    const node = document.getElementById("lote-urls");
+    if (!node) return [];
+    return node.value.split(/\r?\n/).map((s) => normalizarUrl(s)).filter(Boolean);
+  }
+
+  function serialDe(url, index) {
+    try {
+      const tail = new URL(url).pathname.split("/").filter(Boolean).pop() || "";
+      const m = tail.match(/(\d{3,})$/);
+      if (m) return m[1];
+      if (tail) return tail.slice(0, 18);
+    } catch (err) { /* el número de orden basta */ }
+    return String(index + 1).padStart(4, "0");
+  }
+
+  function actualizarHintLote() {
+    const hint = document.getElementById("lote-count-hint");
+    if (!hint) return;
+    const urls = leerUrlsLote();
+    if (!urls.length) {
+      hint.textContent = "Todavía no hay enlaces.";
+      return;
+    }
+    const a = serialDe(urls[0], 0);
+    const b = serialDe(urls[urls.length - 1], urls.length - 1);
+    hint.textContent = urls.length === 1
+      ? "1 tarjeta · " + a
+      : urls.length + " tarjetas · " + a + " a " + b;
+  }
+
+  function vistaPrimeraDelLote() {
+    const urls = leerUrlsLote();
+    if (!urls.length) {
+      state.loteSerial = "";
+      renderCard();
+      return;
+    }
+    state.loteSerial = serialDe(urls[0], 0);
+    try {
+      state.qrDataUrl = pintarQrClasico(urls[0]);
+    } catch (err) {
+      state.qrDataUrl = "";
+    }
+    renderCard();
+  }
+
+  function armarListaLote() {
+    const prefix = document.getElementById("lote-prefix").value.trim();
+    const start = Math.max(1, parseInt(document.getElementById("lote-start").value, 10) || 1);
+    const count = clamp(parseInt(document.getElementById("lote-count").value, 10) || 1, 1, 200);
+    if (!prefix) {
+      alert("Escribe el inicio del enlace. Ejemplo: https://link.nexussystemserp.com/");
+      return;
+    }
+    const lines = [];
+    for (let i = 0; i < count; i++) {
+      lines.push(prefix + String(start + i).padStart(4, "0"));
+    }
+    document.getElementById("lote-urls").value = lines.join("\n");
+    actualizarHintLote();
+    vistaPrimeraDelLote();
+  }
+
+  function csvCelda(s) {
+    const t = String(s);
+    if (/[",\n\r]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
+    return t;
+  }
+
+  function slugsDelLote() {
+    const urls = leerUrlsLote();
+    if (urls.length) return urls.map((url, i) => serialDe(url, i));
+    const prefix = document.getElementById("lote-prefix");
+    if (!prefix || !prefix.value.trim()) return [];
+    const start = Math.max(1, parseInt(document.getElementById("lote-start").value, 10) || 1);
+    const count = clamp(parseInt(document.getElementById("lote-count").value, 10) || 1, 1, 200);
+    const slugs = [];
+    for (let i = 0; i < count; i++) slugs.push(String(start + i).padStart(4, "0"));
+    return slugs;
+  }
+
+  function descargarCsvShort() {
+    const slugs = slugsDelLote();
+    if (!slugs.length) {
+      alert("Indica el inicio del enlace y la cantidad.");
+      return;
+    }
+    const destino = normalizarUrl(document.getElementById("lote-destino") && document.getElementById("lote-destino").value) || "https://nexussystemserp.com/";
+    const lines = ["Original URL,Link slug"];
+    slugs.forEach((slug) => lines.push([destino, slug].map(csvCelda).join(",")));
+    const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "short-io-lote.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
+  function descargarRegistroLote(urls) {
+    const lines = ["numero,enlace_qr,destino"];
+    urls.forEach((url, i) => {
+      lines.push([serialDe(url, i), url, ""].map(csvCelda).join(","));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `chapa-lote-${urls.length}-registro.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
   async function exportPdf() {
-    const { canvas, wMm, hMm } = await rasterAt300();
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: "mm", format: [wMm, hMm], orientation: wMm > hMm ? "landscape" : "portrait" });
-    const img = canvas.toDataURL("image/png");
-    pdf.addImage(img, "PNG", 0, 0, wMm, hMm);
-    const slug = slugify((el.name && el.name.value) || el.title.value);
-    pdf.save(`chapa-${slug}-${sizeSlug()}.pdf`);
+    const prevSerial = state.loteSerial;
+    if (prevSerial) {
+      state.loteSerial = "";
+      renderCard();
+    }
+    try {
+      const { canvas, wMm, hMm } = await rasterAt300();
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: "mm", format: [wMm, hMm], orientation: wMm > hMm ? "landscape" : "portrait" });
+      const img = canvas.toDataURL("image/png");
+      pdf.addImage(img, "PNG", 0, 0, wMm, hMm);
+      const slug = slugify((el.name && el.name.value) || el.title.value);
+      pdf.save(`chapa-${slug}-${sizeSlug()}.pdf`);
+    } finally {
+      if (prevSerial) {
+        state.loteSerial = prevSerial;
+        renderCard();
+      }
+    }
+  }
+
+  async function exportLotePdf() {
+    if (!leerUrlsLote().length) armarListaLote();
+    const urls = leerUrlsLote();
+    if (!urls.length) {
+      alert("Escribe el inicio del enlace y la cantidad.");
+      return;
+    }
+    if (urls.length > 200) {
+      alert("El máximo por PDF es de 200 tarjetas.");
+      return;
+    }
+    const btn = document.getElementById("btn-lote-pdf");
+    const label = btn.textContent;
+    btn.disabled = true;
+    try {
+      const { jsPDF } = window.jspdf;
+      let pdf = null;
+      for (let i = 0; i < urls.length; i++) {
+        btn.textContent = "Tarjeta " + (i + 1) + " de " + urls.length;
+        state.loteSerial = serialDe(urls[i], i);
+        state.qrDataUrl = pintarQrClasico(urls[i]);
+        renderCard();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const raster = await rasterAt300();
+        const img = raster.canvas.toDataURL("image/png");
+        const orient = raster.wMm > raster.hMm ? "landscape" : "portrait";
+        if (!pdf) {
+          pdf = new jsPDF({ compress: true, unit: "mm", format: [raster.wMm, raster.hMm], orientation: orient });
+        } else {
+          pdf.addPage([raster.wMm, raster.hMm], orient);
+        }
+        pdf.addImage(img, "PNG", 0, 0, raster.wMm, raster.hMm, undefined, "FAST");
+      }
+      const slug = slugify((el.name && el.name.value) || el.title.value);
+      pdf.save(`chapa-lote-${urls.length}-${slug}-${sizeSlug()}.pdf`);
+      descargarRegistroLote(urls);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
+      vistaPrimeraDelLote();
+    }
   }
 
   async function exportPng() {
@@ -1468,7 +1813,7 @@
     const onType = (key, input) => {
       if (!input) return;
       const apply = () => {
-        const val = clamp(Number(input.value) || 100, 50, 130);
+        const val = clamp(Number(input.value) || 100, 50, key === "typeTitle" ? 240 : 220);
         if (key === "typeTitle") setMark(state.typeTitleByKey, val);
         else setMark(state.typeBodyByKey, val);
         applyTypeCss();
@@ -1480,7 +1825,7 @@
     onType("typeBody", el.typeBody);
     const onQr = () => {
       if (!el.qrScale) return;
-      setMark(state.qrScaleByKey, clamp(Number(el.qrScale.value) || 100, 50, 180));
+      setMark(state.qrScaleByKey, clamp(Number(el.qrScale.value) || 100, 50, 200));
       applyQrSize();
     };
     if (el.qrScale) {
@@ -1492,7 +1837,9 @@
       if (!input) return;
       const apply = () => {
         const map = which === "logo" ? state.logoScaleByUso : state.lockupScaleByUso;
-        setMark(map, clamp(Number(input.value) || 100, 50, 160));
+        const max = which === "logo" ? 200 : 280;
+        const min = which === "logo" ? 50 : 40;
+        setMark(map, clamp(Number(input.value) || 100, min, max));
         applyMarkCss();
       };
       input.addEventListener("input", apply);
@@ -1505,7 +1852,7 @@
       const map = which === "nfc" ? state.nfcScaleByUso : state.starsScaleByUso;
       if (!input) return;
       const apply = () => {
-        const max = which === "nfc" ? 220 : 180;
+        const max = which === "nfc" ? 320 : 280;
         setMark(map, clamp(Number(input.value) || 100, 50, max));
         applyMarkCss();
       };
@@ -1549,6 +1896,28 @@
     });
     document.getElementById("btn-png").addEventListener("click", () => {
       exportPng().catch(() => alert("No se pudo exportar el PNG."));
+    });
+    document.getElementById("btn-lote-armar").addEventListener("click", armarListaLote);
+    const verSerial = document.getElementById("lote-serial-ver");
+    if (verSerial) {
+      state.mostrarSerial = verSerial.checked;
+      verSerial.addEventListener("change", () => {
+        state.mostrarSerial = verSerial.checked;
+        renderCard();
+      });
+    }
+    document.getElementById("lote-urls").addEventListener("input", actualizarHintLote);
+    document.getElementById("btn-lote-short").addEventListener("click", descargarCsvShort);
+    document.getElementById("btn-lote-csv").addEventListener("click", () => {
+      const urls = leerUrlsLote();
+      if (!urls.length) {
+        alert("Genera o pega al menos un enlace, uno por tarjeta.");
+        return;
+      }
+      descargarRegistroLote(urls);
+    });
+    document.getElementById("btn-lote-pdf").addEventListener("click", () => {
+      exportLotePdf().catch(() => alert("No se pudo exportar el lote."));
     });
 
     let fitRaf = 0;
