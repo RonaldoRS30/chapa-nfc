@@ -454,6 +454,24 @@ textarea { min-height: 56px; resize: vertical; }
 }
 .table-foot { border-bottom: 0; border-top: 1px solid var(--hair); }
 
+.qr-fit-alert {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  z-index: 6;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--press);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  line-height: 1.4;
+}
+.qr-fit-alert[hidden] { display: none; }
+
 .light-well {
   position: relative;
   margin: 18px 28px;

@@ -433,6 +433,7 @@
     document.querySelectorAll("[data-font]").forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.font === state.font));
     });
+    avisoHuecoQr();
   }
 
   function usoKey() {
@@ -541,6 +542,7 @@
     }
     syncMarkLabels();
     applyNfcSize();
+    avisoHuecoQr();
   }
 
   function applyPaletteCss() {
@@ -1244,11 +1246,36 @@
     }
   }
 
+  function huecoStickerMm() {
+    if (!sinQrEnPieza() || state.layout !== "farol") return null;
+    const sub = el.sheet.querySelector(".sub");
+    const bottom = el.sheet.querySelector(".bottom");
+    if (!sub || !bottom) return null;
+    const sheet = el.sheet.getBoundingClientRect();
+    if (!sheet.height) return null;
+    const arriba = sub.getBoundingClientRect();
+    const abajo = bottom.getBoundingClientRect();
+    return (abajo.top - arriba.bottom) / sheet.height * state.heightMm;
+  }
+
+  function avisoHuecoQr() {
+    const note = document.getElementById("qr-fit-alert");
+    if (!note) return;
+    const hueco = huecoStickerMm();
+    const cabe = hueco == null || hueco >= 30;
+    note.hidden = cabe;
+    if (cabe) return;
+    const libre = Math.max(0, hueco) / 10;
+    const texto = libre.toFixed(1).replace(".", ",");
+    note.textContent = "Estás excediendo el espacio del QR. El hueco mide " + texto + " cm y el sticker es de 3 × 3 cm. Baja el título, el texto, las ondas o las estrellas.";
+  }
+
   function updateStatus() {
     const n = 5;
     const qr = state.qrDataUrl ? "QR listo para escanear" : "QR en espera (falta URL)";
     el.status.textContent = `Tamaño de prensa: ${formatPair(state.widthMm, state.heightMm)} · paleta detectada: ${n} tintas · ${qr}`;
     updateExportHint();
+    avisoHuecoQr();
   }
 
   async function regenQr() {
