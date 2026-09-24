@@ -141,6 +141,15 @@
               </svg>
               Página web
             </button>
+            <button type="button" data-red="general" aria-pressed="false">
+              <svg class="red-ico" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="4" y="8" width="16" height="16" rx="4" fill="#dd2a7b"/>
+                <rect x="28" y="8" width="16" height="16" rx="4" fill="#1877F2"/>
+                <rect x="4" y="24" width="16" height="16" rx="4" fill="#25D366"/>
+                <rect x="28" y="24" width="16" height="16" rx="4" fill="#0f766e"/>
+              </svg>
+              General
+            </button>
           </div>
         </div>
       </section>
@@ -256,10 +265,10 @@
       <section class="block">
         <h2>Exportar</h2>
         <div class="export-row">
-          <button type="button" class="btn-press" id="btn-pdf">Exportar PDF de impresión</button>
+          <button type="button" class="btn-press" id="btn-pdf">Descargar 1 tarjeta</button>
           <button type="button" class="btn-ghost" id="btn-png">Descargar PNG 300 dpi</button>
         </div>
-        <p class="hint" id="export-size">El PDF sale a 5.41 × 8.51 cm. El PNG es la misma pieza a 300 dpi, lista para imprenta.</p>
+        <p class="hint" id="export-size">Una sola tarjeta, con las medidas de la vista previa: 5.41 × 8.51 cm.</p>
       </section>
 
       <section class="block" style="border-bottom:0" aria-labelledby="lote-h">
@@ -293,9 +302,10 @@
         <div class="export-row">
           <button type="button" class="btn-ghost" id="btn-lote-short">Descargar CSV para Short.io</button>
           <button type="button" class="btn-press" id="btn-lote-pdf">Exportar PDF del lote</button>
+          <button type="button" class="btn-ghost" id="btn-lote-qrs">PDF de QRs en A4</button>
           <button type="button" class="btn-ghost" id="btn-lote-csv">Descargar registro CSV</button>
         </div>
-        <p class="hint">Exportar PDF del lote arma una página por enlace, con su QR. Si la casilla está activa, también imprime el número. Con 200 tarjetas tarda varios minutos: deja esta pestaña abierta hasta que baje el archivo.</p>
+        <p class="hint">El PDF del lote arma una página por tarjeta. El PDF de QRs lleva cada código a 3 × 3 cm, 48 por hoja A4, con el número chico debajo. Con 200 tarjetas tarda varios minutos: deja esta pestaña abierta hasta que baje el archivo.</p>
       </section>
     </aside>
 

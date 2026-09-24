@@ -330,6 +330,12 @@ textarea { min-height: 56px; resize: vertical; }
   display: block;
   flex: none;
 }
+.red-pick button[data-red="general"] {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  min-height: 52px;
+  gap: 10px;
+}
 .variants { margin-top: 10px; }
 .variants button { font-size: 9px; padding: 10px 2px; letter-spacing: 0.06em; }
 .layouts button {
@@ -644,6 +650,18 @@ textarea { min-height: 56px; resize: vertical; }
   flex: none;
   display: block;
 }
+.use-lockup-general {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  align-items: center;
+  gap: 0.12em 0.16em;
+  max-width: none;
+}
+.use-lockup-general .brand-ico {
+  width: calc(var(--short) * 0.1 * var(--lockup-scale, 1));
+  height: calc(var(--short) * 0.1 * var(--lockup-scale, 1));
+}
 .uso-carta .use-lockup { color: currentColor; }
 .uso-redes .use-lockup { color: currentColor; }
 .uso-whatsapp .use-lockup { color: currentColor; }
@@ -802,6 +820,10 @@ textarea { min-height: 56px; resize: vertical; }
   max-width: 58%;
   font-size: calc(var(--short) * 0.055 * var(--type-body) * var(--lockup-scale, 1));
 }
+.layout-farol .banner .use-lockup-general {
+  max-width: none;
+  flex: none;
+}
 .layout-farol .sheet-inner.compact .logo-slot {
   width: calc(var(--short) * 0.32 * var(--logo-scale, 1));
   height: calc(var(--short) * 0.32 * var(--logo-scale, 1));
@@ -834,6 +856,8 @@ textarea { min-height: 56px; resize: vertical; }
   align-items: flex-end;
 }
 .layout-farol .nfc-hint { font-size: calc(var(--short) * 0.032 * var(--type-body)); text-align: left; max-width: 52%; }
+.sin-qr.layout-farol .bottom { justify-content: center; }
+.sin-qr.layout-farol .nfc-hint { text-align: center; max-width: 90%; }
 
 /* Placa */
 .layout-placa .sheet-inner {
@@ -1172,6 +1196,15 @@ textarea { min-height: 56px; resize: vertical; }
 .scale-compact.uso-redes.layout-farol .banner {
   border-radius: 0 0 22% 22% / 0 0 48% 48%;
   min-height: 0;
+}
+.red-general.layout-farol .banner,
+.has-name.red-general.layout-farol .banner {
+  border-radius: 0 0 18% 18% / 0 0 40% 40%;
+}
+.scale-compact.red-general.layout-farol .banner,
+.scale-compact.uso-redes.red-general.layout-farol .banner,
+.scale-micro.red-general.layout-farol .banner {
+  border-radius: 0 0 10% 10% / 0 0 28% 28%;
 }
 .scale-compact.uso-carta.layout-farol .banner { min-height: 0; }
 .scale-compact.uso-whatsapp.layout-farol .banner {

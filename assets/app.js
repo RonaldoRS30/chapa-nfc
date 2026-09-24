@@ -42,7 +42,7 @@
       title: "Síguenos",
       sub: "Acerca el teléfono y entra a nuestras redes",
       nfc: "Toca para seguirnos",
-      hint: "Elige Instagram, Facebook, WhatsApp o tu web y pega el link.",
+      hint: "Elige una red o la presentación general, y pega el link.",
       placeholder: "https://instagram.com/…",
       qrEmpty: "Pega el link de la red para generar el QR",
       stars: false,
@@ -99,6 +99,16 @@
       placeholder: "https://www.tunegocio.com",
       qrEmpty: "Pega la web para generar el QR",
       label: "Web",
+    },
+    general: {
+      top: "Redes sociales",
+      title: "Síguenos",
+      sub: "Acerca el teléfono y entra a nuestras redes",
+      nfc: "Toca para seguirnos",
+      hint: "Presentación con Instagram, Facebook, WhatsApp y la web. Pega el enlace general (bio, web o el que abre todas).",
+      placeholder: "https://…/redes",
+      qrEmpty: "Pega el enlace general para generar el QR",
+      label: "Redes",
     },
   };
 
@@ -467,7 +477,7 @@
 
   function syncMarkLabels() {
     const names = { google: "Reseña", carta: "Carta", redes: "Redes", whatsapp: "WhatsApp" };
-    const icons = { google: "Google", carta: "Carta", redes: "la red", whatsapp: "WhatsApp" };
+    const icons = { google: "Google", carta: "Carta", redes: state.red === "general" ? "las redes" : "la red", whatsapp: "WhatsApp" };
     const layouts = { farol: "Farol", placa: "Placa", ficha: "Ficha" };
     const usoNom = names[usoKey()] || "este uso";
     const layNom = layouts[layoutKey()] || "Farol";
@@ -710,6 +720,9 @@
   function lockupRedes() {
     const red = state.red || "instagram";
     const label = (REDES[red] && REDES[red].label) || "Redes";
+    if (red === "general") {
+      return `<div class="use-lockup use-lockup-red use-lockup-general" aria-label="${label}">${iconIg()}${iconFb()}${iconWa()}${iconWeb()}</div>`;
+    }
     const icons = { instagram: iconIg, facebook: iconFb, whatsapp: iconWa, web: iconWeb };
     const ico = (icons[red] || iconIg)();
     return `<div class="use-lockup use-lockup-red">${ico}<span>${label}</span></div>`;
@@ -925,7 +938,12 @@
     </svg>`;
   }
 
+  function sinQrEnPieza() {
+    return state.uso === "google" || (state.uso === "redes" && state.red === "general");
+  }
+
   function qrBlock() {
+    if (sinQrEnPieza()) return "";
     const pack = state.uso === "redes" ? REDES[state.red] : USOS[state.uso];
     const empty = (pack && pack.qrEmpty) || "Pega la URL para generar el QR";
     const serial = state.loteSerial && state.mostrarSerial
@@ -1087,6 +1105,7 @@
     if (esPlaza()) el.sheet.classList.add("is-square");
     if (name) el.sheet.classList.add("has-name");
     if (!state.mostrarLogo) el.sheet.classList.add("no-logo");
+    if (sinQrEnPieza()) el.sheet.classList.add("sin-qr");
 
     if (state.layout === "farol") {
       html = `${demo}
@@ -1421,9 +1440,9 @@
     const pieza = formatPair(state.widthMm, state.heightMm);
     if (state.bleed) {
       const full = formatPair(state.widthMm + state.bleed * 2, state.heightMm + state.bleed * 2);
-      node.textContent = `Pieza ${pieza}. El PDF/PNG salen a ${full} (incluye sangrado) a 300 dpi.`;
+      node.textContent = `Una sola tarjeta, vista previa ${pieza}. El archivo incluye sangrado y sale a ${full}.`;
     } else {
-      node.textContent = `El PDF sale a ${pieza}. El PNG es la misma pieza a 300 dpi, lista para imprenta.`;
+      node.textContent = `Una sola tarjeta, con las medidas de la vista previa: ${pieza}.`;
     }
   }
 
@@ -1704,11 +1723,67 @@
       const slug = slugify((el.name && el.name.value) || el.title.value);
       pdf.save(`chapa-lote-${urls.length}-${slug}-${sizeSlug()}.pdf`);
       descargarRegistroLote(urls);
+      guardarPdfQrs(urls);
     } finally {
       btn.disabled = false;
       btn.textContent = label;
       vistaPrimeraDelLote();
     }
+  }
+
+  function urlsParaQrs() {
+    const lote = leerUrlsLote();
+    if (lote.length) return lote;
+    const one = normalizarUrl(el.url.value);
+    return one ? [one] : [];
+  }
+
+  function guardarPdfQrs(urls) {
+    const { jsPDF } = window.jspdf;
+    const pageW = 210;
+    const pageH = 297;
+    const qr = 30;
+    const labelH = 3.2;
+    const gap = 1.6;
+    const cols = 6;
+    const rows = 8;
+    const pitchX = qr + gap;
+    const pitchY = qr + labelH + gap;
+    const gridW = cols * qr + (cols - 1) * gap;
+    const gridH = rows * (qr + labelH) + (rows - 1) * gap;
+    const originX = (pageW - gridW) / 2;
+    const originY = (pageH - gridH) / 2;
+    const perPage = cols * rows;
+    const pdf = new jsPDF({ compress: true, unit: "mm", format: "a4", orientation: "portrait" });
+    urls.forEach((url, i) => {
+      const slot = i % perPage;
+      if (i > 0 && slot === 0) pdf.addPage("a4", "portrait");
+      const col = slot % cols;
+      const row = Math.floor(slot / cols);
+      const x = originX + col * pitchX;
+      const y = originY + row * pitchY;
+      pdf.addImage(pintarQrClasico(url), "PNG", x, y, qr, qr, undefined, "FAST");
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(serialDe(url, i), x + qr / 2, y + qr + 2.4, { align: "center" });
+    });
+    const slug = slugify((el.name && el.name.value) || el.title.value);
+    pdf.save(`chapa-qrs-a4-${urls.length}-${slug}.pdf`);
+  }
+
+  function exportQrsPdf() {
+    if (!leerUrlsLote().length) armarListaLote();
+    const urls = urlsParaQrs();
+    if (!urls.length) {
+      alert("Pega un enlace o genera la lista del lote.");
+      return;
+    }
+    if (urls.length > 200) {
+      alert("El máximo por PDF es de 200 códigos.");
+      return;
+    }
+    guardarPdfQrs(urls);
   }
 
   async function exportPng() {
@@ -1974,6 +2049,10 @@
     });
     document.getElementById("btn-lote-pdf").addEventListener("click", () => {
       exportLotePdf().catch(() => alert("No se pudo exportar el lote."));
+    });
+    document.getElementById("btn-lote-qrs").addEventListener("click", () => {
+      try { exportQrsPdf(); }
+      catch (err) { alert("No se pudo exportar el PDF de QRs."); }
     });
 
     let fitRaf = 0;
